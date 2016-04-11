@@ -44,6 +44,7 @@ def create_p2_actions(actions, atoms):
     return p2
 
 def h2(task, atoms, actions):
+    atoms = common.filter_atoms(atoms)
     actions = create_p2_actions(actions, atoms)
 
     lastsize = 0

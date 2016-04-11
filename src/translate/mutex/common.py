@@ -1,6 +1,11 @@
-import itertools
-from itertools import combinations as comb
 import networkx as nx
+from itertools import combinations as comb
+
+import common
+
+def filter_atoms(atoms):
+    atoms = [x for x in atoms if str(x).find('@') == -1]
+    return set(atoms)
 
 def gen_pair_mutexes(mutexes):
     pairs = [list(comb(m, 2)) for m in mutexes]
@@ -64,6 +69,7 @@ class ExtendFact(object):
         self.mutex.add(f.fact)
 
 def extend_mutexes(mutexes, task, atoms, actions):
+    atoms = common.filter_atoms(atoms)
     pairs = gen_pair_mutexes(mutexes)
     if len(pairs) == 0:
         return pairs

@@ -1,6 +1,9 @@
 import cplex
 
+import common
+
 def fa(task, atoms, actions):
+    atoms = common.filter_atoms(atoms)
     atoms_set = atoms
     atoms = list(atoms)
     atom_to_idx = dict(zip(atoms, range(len(atoms))))
