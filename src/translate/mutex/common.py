@@ -4,11 +4,17 @@ import networkx as nx
 
 def gen_pair_mutexes(mutexes):
     pairs = [list(comb(m, 2)) for m in mutexes]
+    if len(pairs) == 0:
+        return set()
+
     pairs = reduce(lambda x, y: x + y, pairs)
     pairs = set([tuple(x) for x in pairs])
     return pairs
 
 def max_mutexes_from_pair_mutexes(pairs):
+    if len(pairs) == 0:
+        return []
+
     atoms = reduce(lambda x, y: x + y, [list(x) for x in pairs])
     atoms_to_idx = {x:i for i, x in enumerate(atoms)}
 
@@ -59,12 +65,16 @@ class ExtendFact(object):
 
 def extend_mutexes(mutexes, task, atoms, actions):
     pairs = gen_pair_mutexes(mutexes)
+    if len(pairs) == 0:
+        return pairs
+
     actions = [ExtendAction(x) for x in actions]
     facts = { x : ExtendFact(x, pairs, actions) for x in atoms }
 
     candidates = set([tuple(sorted(x)) for x in comb(atoms, 2)])
     candidates -= pairs
-    candidates -= set([tuple(sorted(x)) for x in comb(task.init, 2)])
+    init = set(task.init) & atoms
+    candidates -= set([tuple(sorted(x)) for x in comb(init, 2)])
     for a in actions:
         candidates -= set([tuple(sorted(x)) for x in comb(a.add_eff, 2)])
 
