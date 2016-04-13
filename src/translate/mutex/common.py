@@ -62,27 +62,31 @@ class ExtendFact(object):
     def check(self, f2):
         rel_actions = f2.add_action & self.del_action
         for a in rel_actions:
-            if not a.spurious and len(a.pre & self.mutex) != 1:
+            if not a.spurious and len(a.pre & self.mutex) == 0:
                 return False
         return True
 
     def add_mutex(self, f):
         self.mutex.add(f.fact)
 
-def spurious_detector(actions):
-    dct = {}
-    for a in actions:
-        for pair in set(list(comb(a.pre, 2)) + list(comb(a.add_eff, 2))):
-            pair = tuple(sorted(pair))
-            if pair not in dct:
-                dct[pair] = set()
-            dct[pair].add(a)
-    return dct
+class SpuriousDetector(object):
+    def __init__(self, actions):
+        self.dct = {}
+        for a in actions:
+            for pair in set(list(comb(a.pre, 2)) + list(comb(a.add_eff, 2))):
+                pair = tuple(sorted(pair))
+                if pair not in self.dct:
+                    self.dct[pair] = set()
+                self.dct[pair].add(a)
 
-def set_spurious(dct, pairs):
-    for pair in pairs:
-        for a in dct.get(pair, set()):
-            a.spurious = True
+    def set_spurious(self, pairs):
+        for pair in pairs:
+            for a in self.dct.get(pair, set()):
+                a.spurious = True
+            self.dct.pop(pair, None)
+
+    def exist(self, pair):
+        return pair in self.dct
 
 def extend_mutexes(mutexes, task, atoms, actions):
     atoms = common.filter_atoms(atoms)
@@ -91,28 +95,29 @@ def extend_mutexes(mutexes, task, atoms, actions):
         return pairs
 
     actions = [ExtendAction(x) for x in actions]
-    spurious = spurious_detector(actions)
-    set_spurious(spurious, pairs)
+    spurious = SpuriousDetector(actions)
+    spurious.set_spurious(pairs)
     facts = { x : ExtendFact(x, pairs, actions) for x in atoms }
 
     candidates = set([tuple(sorted(x)) for x in comb(atoms, 2)])
     candidates -= pairs
     init = set(task.init) & atoms
     candidates -= set([tuple(sorted(x)) for x in comb(init, 2)])
-    for a in actions:
-        candidates -= set([tuple(sorted(x)) for x in comb(a.add_eff, 2)])
 
     candidates = set([tuple([facts[x] for x in y]) for y in candidates])
 
     candidates_size = 0
     while candidates_size != len(candidates):
         candidates_size = len(candidates)
-        for cand in candidates:
+        for cand in list(candidates):
+            if spurious.exist(tuple([x.fact for x in cand])):
+                continue
+
             if cand[0].check(cand[1]) and cand[1].check(cand[0]):
                 pair = tuple(sorted([x.fact for x in cand]))
-                set_spurious(spurious, [pair])
+                spurious.set_spurious([pair])
                 pairs.add(pair)
+                candidates.remove(cand)
                 cand[0].add_mutex(cand[1])
                 cand[1].add_mutex(cand[0])
-        candidates -= pairs
     return pairs
