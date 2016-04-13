@@ -7,7 +7,7 @@ def filter_atoms(atoms):
     atoms = [x for x in atoms if str(x).find('@') == -1]
     return set(atoms)
 
-def gen_pair_mutexes(mutexes):
+def pair_mutexes(mutexes):
     pairs = [list(comb(m, 2)) for m in mutexes]
     if len(pairs) == 0:
         return set()
@@ -29,7 +29,7 @@ def max_mutexes_from_pair_mutexes(pairs):
     return [[atoms[x] for x in c] for c in nx.find_cliques(graph)]
 
 def max_mutexes(mutexes):
-    pairs = gen_pair_mutexes(mutexes)
+    pairs = pair_mutexes(mutexes)
     return max_mutexes_from_pair_mutexes(pairs)
 
 
@@ -86,7 +86,7 @@ def set_spurious(dct, pairs):
 
 def extend_mutexes(mutexes, task, atoms, actions):
     atoms = common.filter_atoms(atoms)
-    pairs = gen_pair_mutexes(mutexes)
+    pairs = pair_mutexes(mutexes)
     if len(pairs) == 0:
         return pairs
 
