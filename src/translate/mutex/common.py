@@ -39,6 +39,7 @@ class ExtendAction(object):
         self.pre = set(action.precondition)
         self.add_eff = set([x[1] for x in action.add_effects if len(x[0]) == 0])
         self.del_eff = set([x[1] for x in action.del_effects if len(x[0]) == 0])
+        self.spurious = False
         # TODO: Conditional effects
 
 class ExtendFact(object):
@@ -61,12 +62,27 @@ class ExtendFact(object):
     def check(self, f2):
         rel_actions = f2.add_action & self.del_action
         for a in rel_actions:
-            if len(a.pre & self.mutex) != 1:
+            if not a.spurious and len(a.pre & self.mutex) != 1:
                 return False
         return True
 
     def add_mutex(self, f):
         self.mutex.add(f.fact)
+
+def spurious_detector(actions):
+    dct = {}
+    for a in actions:
+        for pair in set(list(comb(a.pre, 2)) + list(comb(a.add_eff, 2))):
+            pair = tuple(sorted(pair))
+            if pair not in dct:
+                dct[pair] = set()
+            dct[pair].add(a)
+    return dct
+
+def set_spurious(dct, pairs):
+    for pair in pairs:
+        for a in dct.get(pair, set()):
+            a.spurious = True
 
 def extend_mutexes(mutexes, task, atoms, actions):
     atoms = common.filter_atoms(atoms)
@@ -75,6 +91,8 @@ def extend_mutexes(mutexes, task, atoms, actions):
         return pairs
 
     actions = [ExtendAction(x) for x in actions]
+    spurious = spurious_detector(actions)
+    set_spurious(spurious, pairs)
     facts = { x : ExtendFact(x, pairs, actions) for x in atoms }
 
     candidates = set([tuple(sorted(x)) for x in comb(atoms, 2)])
@@ -91,7 +109,9 @@ def extend_mutexes(mutexes, task, atoms, actions):
         candidates_size = len(candidates)
         for cand in candidates:
             if cand[0].check(cand[1]) and cand[1].check(cand[0]):
-                pairs.add(tuple(sorted([x.fact for x in cand])))
+                pair = tuple(sorted([x.fact for x in cand]))
+                set_spurious(spurious, [pair])
+                pairs.add(pair)
                 cand[0].add_mutex(cand[1])
                 cand[1].add_mutex(cand[0])
         candidates -= pairs
