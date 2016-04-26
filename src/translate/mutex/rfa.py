@@ -4,11 +4,14 @@ from itertools import combinations as comb
 import common
 
 class RFAAction(object):
-    def __init__(self, action, atom_to_fact):
+    def __init__(self, action, atoms, atom_to_fact):
         self.name = action.name
-        self.pre = set([atom_to_fact[x] for x in action.precondition if not x.negated])
-        self.add_eff = set([atom_to_fact[x[1]] for x in action.add_effects])
-        self.del_eff = set([atom_to_fact[x[1]] for x in action.del_effects])
+        pre = set(action.precondition) & atoms
+        add_eff = set([x[1] for x in action.add_effects]) & atoms
+        del_eff = set([x[1] for x in action.del_effects]) & atoms
+        self.pre = set([atom_to_fact[x] for x in pre if not x.negated])
+        self.add_eff = set([atom_to_fact[x] for x in add_eff])
+        self.del_eff = set([atom_to_fact[x] for x in del_eff])
         self.pre_del = self.pre & self.del_eff
 
 class RFAFact(object):
@@ -120,7 +123,7 @@ def rfa_conflict_bind(task, atoms, actions):
     atoms = common.filter_atoms(atoms)
     atom_to_fact = { a : RFAFact(a, atoms) for a in atoms }
     facts = atom_to_fact.values()
-    actions = [RFAAction(a, atom_to_fact) for a in actions]
+    actions = [RFAAction(a, atoms, atom_to_fact) for a in actions]
     [(f.set_all_facts(facts), f.set_actions(actions)) for f in facts]
 
     rfa_init(atom_to_fact, task, atoms, actions)
@@ -140,8 +143,7 @@ def rfa(task, atoms, actions):
     for f in facts:
         if f.check_rfa():
             rfa.add(frozenset([x.fact for x in f.bind]))
-    rfa = [list(x) for x in rfa]
-    return rfa
+    return rfa, set()
 
 def rfa_complete(task, atoms, actions):
     facts = rfa_conflict_bind(task, atoms, actions)
@@ -195,7 +197,7 @@ def rfa_complete(task, atoms, actions):
     #print(c.solution.get_status())
     while ilp.solution.get_status() == 101:
         values = ilp.solution.get_values()
-        if sum(values) <= 0.5:
+        if sum(values) <= 1.5:
             break
         sol = [facts[x].fact for x in range(len(values)) if values[x] > 0.5]
         mutexes += [sol]
@@ -208,4 +210,4 @@ def rfa_complete(task, atoms, actions):
                                    senses = ['G'], rhs = [1.])
         ilp.solve()
 
-    return mutexes
+    return mutexes, set()

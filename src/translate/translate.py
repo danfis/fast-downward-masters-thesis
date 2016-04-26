@@ -530,6 +530,18 @@ def pddl_to_sas(task):
     with timers.timing("Computing fact groups", block=True):
         groups, mutex_groups, translation_key = fact_groups.compute_groups(
             task, atoms, reachable_action_params)
+        import mutex
+#        rfa, _ = mutex.rfa(task, atoms, actions)
+#        fa, _ = mutex.fa(task, atoms, actions)
+#        all_mutexes, unreachable = mutex.full(task, atoms, actions, True)
+#        mutex.check_mutexes(all_mutexes, groups)
+#        mutex.check_mutexes(all_mutexes, fa)
+#        mutex.check_mutexes(all_mutexes, rfa)
+#        rfa, _ = mutex.rfa_complete(task, atoms, actions)
+#        mutex.check_mutexes(all_mutexes, rfa)
+        h2, _ = mutex.h2(task, atoms, actions)
+#        mutex.check_mutexes(all_mutexes, h2)
+        print(len(h2))
 
     with timers.timing("Building STRIPS to SAS dictionary"):
         ranges, strips_to_sas = strips_to_sas_dictionary(

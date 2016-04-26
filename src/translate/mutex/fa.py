@@ -4,9 +4,11 @@ import common
 
 def fa(task, atoms, actions):
     atoms = common.filter_atoms(atoms)
-    atoms_set = atoms
-    atoms = list(atoms)
-    atom_to_idx = dict(zip(atoms, range(len(atoms))))
+    atoms_dict, atoms_list = common.create_atoms_dict(atoms)
+
+#    atoms_set = atoms
+#    atoms = list(atoms)
+#    atom_to_idx = dict(zip(atoms, range(len(atoms))))
 
     ilp = cplex.Cplex()
     ilp.objective.set_sense(ilp.objective.sense.maximize)
@@ -15,21 +17,24 @@ def fa(task, atoms, actions):
     ilp.set_results_stream(None)
     ilp.set_warning_stream(None)
     ilp.parameters.tune_problem([(ilp.parameters.threads, 1)])
-    ilp.variables.add(obj = [1. for x in atoms],
-                      names = [str(x) for x in atoms],
-                      types = ['B' for x in atoms])
+    ilp.variables.add(obj = [1. for x in atoms_list],
+                      names = [str(x) for x in atoms_list],
+                      types = ['B' for x in atoms_list])
 
     # Initial state constraint
-    s_init = list(set(task.init) & atoms_set)
-    constr = cplex.SparsePair(ind = [atom_to_idx[x] for x in s_init],
+    s_init = list(set(task.init) & atoms)
+    constr = cplex.SparsePair(ind = [atoms_dict[x] for x in s_init],
                               val = [1. for _ in s_init])
     ilp.linear_constraints.add(lin_expr = [constr], senses = ['L'], rhs = [1.])
 
     # Action constraints
     for action in actions:
-        pre = [atom_to_idx[x] for x in action.precondition if not x.negated]
-        add_eff = [atom_to_idx[x[1]] for x in action.add_effects]
-        del_eff = [atom_to_idx[x[1]] for x in action.del_effects]
+        pre = set(action.precondition) & atoms
+        add_eff = set([x[1] for x in action.add_effects]) & atoms
+        del_eff = set([x[1] for x in action.del_effects]) & atoms
+        pre = [atoms_dict[x] for x in pre if not x.negated]
+        add_eff = [atoms_dict[x] for x in add_eff]
+        del_eff = [atoms_dict[x] for x in del_eff]
         if len(add_eff) == 0:
             continue
 
@@ -45,10 +50,10 @@ def fa(task, atoms, actions):
     #print(c.solution.get_status())
     while ilp.solution.get_status() == 101:
         values = ilp.solution.get_values()
-        if sum(values) <= 0.5:
+        if sum(values) <= 1.5:
             break
-        sol = [atoms[x] for x in range(len(values)) if values[x] > 0.5]
-        mutexes += [sol]
+        sol = [atoms_list[x] for x in range(len(values)) if values[x] > 0.5]
+        mutexes += [frozenset(sol)]
 
         # Add constraint removing all subsets of the current solution
         constr_idx = [x for x in range(len(values)) if values[x] < 0.5]
@@ -58,4 +63,4 @@ def fa(task, atoms, actions):
                                    senses = ['G'], rhs = [1.])
         ilp.solve()
 
-    return mutexes
+    return mutexes, set()

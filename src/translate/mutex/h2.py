@@ -64,27 +64,29 @@ def h2p2(task, atoms, actions):
     unreachable = atoms - reached
     return h2_mutex, unreachable
 
+
+
 class H2Action(object):
-    def __init__(self, a):
+    def __init__(self, a, atoms):
         self.name = a.name
 
-        pre = a.precondition
-        add_eff = [x[1] for x in a.add_effects if len(x[0]) == 0]
-        del_eff = [x[1] for x in a.del_effects if len(x[0]) == 0]
+        pre = set(a.precondition) & atoms
+        add_eff = set([x[1] for x in a.add_effects if len(x[0]) == 0]) & atoms
+        del_eff = set([x[1] for x in a.del_effects if len(x[0]) == 0]) & atoms
         self.pre1 = set(pre)
         self.add_eff1 = set(add_eff)
         self.add_del = set(add_eff) | set(del_eff)
 
-        self.pre2 = set(gen_pair_meta_atoms(self.pre1))
+        self.pre2 = common.gen_all_pairs([self.pre1])
         p = self.pre1 - self.add_del
-        self.add_eff2 = set(gen_pair_meta_atoms(self.add_eff1 | p))
+        self.add_eff2 = common.gen_all_pairs([self.add_eff1 | p])
 
         self.pre = self.pre1 | self.pre2
         self.add_eff = self.add_eff1 | self.add_eff2
 
     def pairs(self, fact, facts):
         for f in facts:
-            yield tuple(sorted([fact, f]))
+            yield frozenset([fact, f])
 
     def eff(self, reached):
         h2 = set(self.add_eff)
@@ -95,18 +97,18 @@ class H2Action(object):
             pre = set(self.pairs(atom, self.pre1))
             if pre.issubset(reached):
                 for atom2 in self.add_eff1:
-                    t = tuple(sorted([atom, atom2]))
+                    t = frozenset([atom, atom2])
                     h2.add(t)
         return h2
 
 
 def h2(task, atoms, actions):
     atoms = common.filter_atoms(atoms)
-    actions = [H2Action(a) for a in actions]
+    actions = [H2Action(a, atoms) for a in actions]
 
     lastsize = 0
     init = set(task.init) & atoms
-    reached = set(gen_meta_atoms(init))
+    reached = common.gen_all_pairs([init]) | init
     while len(reached) != lastsize:
         lastsize = len(reached)
 
@@ -114,11 +116,12 @@ def h2(task, atoms, actions):
             if a.pre.issubset(reached):
                 reached |= a.eff(reached)
 
-    h2 = set(gen_meta_atoms(atoms)) - reached
-    h1 = set([x for x in h2 if type(x) is not tuple])
-    h2 -= h1
-    h2 |= set([tuple([x]) for x in h1])
-    return list(h2)
+    m2 = common.gen_all_pairs([atoms]) - reached
+    unreachable = atoms - set([x for x in reached if type(x) is not tuple])
+#    print('XXX')
+#    print(len(m2))
+#    print(len(unreachable))
+    return m2, unreachable
 
 def h2_max(task, atoms, actions):
     h2_mutex, unreachable = h2(task, atoms, actions)
