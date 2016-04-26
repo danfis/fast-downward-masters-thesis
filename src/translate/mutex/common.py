@@ -5,7 +5,27 @@ import common
 
 def filter_atoms(atoms):
     atoms = [x for x in atoms if str(x).find('@') == -1]
+    atoms = [x for x in atoms if str(x).find('Atom =') != 0]
     return set(atoms)
+
+def create_atoms_dict(atoms):
+    atoms = sorted(atoms)
+    d = {a : i for i, a in enumerate(atoms) }
+    return d, atoms
+
+def atoms_to_keys(atoms, atoms_dict):
+    keys = [atoms_dict[x] for x in atoms]
+    return set(keys)
+
+def gen_all_pairs(sets):
+    pairs = [list(comb(s, 2)) for s in sets]
+    if len(pairs) == 0:
+        return set()
+
+    pairs = reduce(lambda x, y: x + y, pairs)
+    pairs = set([frozenset(x) for x in pairs])
+    return pairs
+
 
 def pair_mutexes(mutexes):
     pairs = [list(comb(m, 2)) for m in mutexes]
