@@ -8,7 +8,6 @@ class H2Action(object):
     def __init__(self, a, atoms):
         self.name = a.name
         self.applied = False
-        self.disabled = False
 
         pre = set(a.precondition) & atoms
         add_eff = set([x[1] for x in a.add_effects if len(x[0]) == 0]) & atoms
@@ -29,8 +28,12 @@ class H2Action(object):
             yield frozenset([fact, f])
 
     def eff(self, reached1, reached2):
-        r1 = self.add_eff1
-        r2 = self.add_eff2
+        if not self.applied:
+            r1 = self.add_eff1
+            r2 = self.add_eff2
+        else:
+            r1 = set()
+            r2 = set()
 
         atoms = reached1 - self.add_del
         for atom in atoms:
@@ -39,7 +42,7 @@ class H2Action(object):
                 for atom2 in self.add_eff1:
                     t = frozenset([atom, atom2])
                     r2.add(t)
-                    self.add_del.add(atom)
+                self.add_del.add(atom)
 
         self.applied = True
         return r1, r2
