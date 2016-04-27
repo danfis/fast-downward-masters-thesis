@@ -17,7 +17,7 @@ def action_apply(a, state, states_out):
         news = (state - a.del_eff) | a.add_eff
         states_out.add(news)
 
-def full(task, atoms, actions, verbose = False):
+def full(task, atoms, actions, verbose = False, max_states = -1):
     atoms = common.filter_atoms(atoms)
     init = set(task.init) & atoms
     actions = [FullAction(a, atoms) for a in actions]
@@ -40,6 +40,11 @@ def full(task, atoms, actions, verbose = False):
 
         if verbose:
             print('mutex.full():: Reached states:', len(reached_states))
+
+        if max_states >= 0 and len(reached_states) > max_states:
+            print('mutex.full():: Exceeded max-states ({0}/{1}).  Aborted.'
+                    .format(len(reached_states), max_states))
+            return None, None
 
     mutexes = unreached_pairs
     return mutexes, unreached_facts

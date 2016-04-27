@@ -192,7 +192,7 @@ def rfa_complete(task, atoms, actions):
         ilp.linear_constraints.add(lin_expr = [cbind, cconfl],
                                    senses = ['L', 'L'], rhs = [0., len(confl)])
 
-    mutexes = []
+    mutexes = set()
     ilp.solve()
     #print(c.solution.get_status())
     while ilp.solution.get_status() == 101:
@@ -200,7 +200,7 @@ def rfa_complete(task, atoms, actions):
         if sum(values) <= 1.5:
             break
         sol = [facts[x].fact for x in range(len(values)) if values[x] > 0.5]
-        mutexes += [sol]
+        mutexes.add(frozenset(sol))
 
         # Add constraint removing all subsets of the current solution
         constr_idx = [x for x in range(len(values)) if values[x] < 0.5]

@@ -2,13 +2,9 @@ import cplex
 
 import common
 
-def fa(task, atoms, actions):
+def fa(task, atoms, actions, rfa = False):
     atoms = common.filter_atoms(atoms)
     atoms_dict, atoms_list = common.create_atoms_dict(atoms)
-
-#    atoms_set = atoms
-#    atoms = list(atoms)
-#    atom_to_idx = dict(zip(atoms, range(len(atoms))))
 
     ilp = cplex.Cplex()
     ilp.objective.set_sense(ilp.objective.sense.maximize)
@@ -44,8 +40,12 @@ def fa(task, atoms, actions):
                                         + [-1. for _ in pre_del])
         ilp.linear_constraints.add(lin_expr = [constr],
                                    senses = ['L'], rhs = [0.])
+        if rfa:
+            constr2 = cplex.SparsePair(ind = pre_del, val = [1. for _ in pre_del])
+            ilp.linear_constraints.add(lin_expr = [constr2],
+                                       senses = ['L'], rhs = [1.])
 
-    mutexes = []
+    mutexes = set()
     ilp.solve()
     #print(c.solution.get_status())
     while ilp.solution.get_status() == 101:
@@ -53,7 +53,7 @@ def fa(task, atoms, actions):
         if sum(values) <= 1.5:
             break
         sol = [atoms_list[x] for x in range(len(values)) if values[x] > 0.5]
-        mutexes += [frozenset(sol)]
+        mutexes.add(frozenset(sol))
 
         # Add constraint removing all subsets of the current solution
         constr_idx = [x for x in range(len(values)) if values[x] < 0.5]
