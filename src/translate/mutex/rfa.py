@@ -2,6 +2,7 @@ import cplex
 from itertools import combinations as comb
 
 import common
+import fa
 
 class RFAAction(object):
     def __init__(self, action, atoms, atom_to_fact):
@@ -147,67 +148,4 @@ def rfa(task, atoms, actions):
 
 def rfa_complete(task, atoms, actions):
     facts = rfa_conflict_bind(task, atoms, actions)
-    facts = [f for f in facts if not f.useless]
-    fact_to_idx = { x.fact : i for i, x in enumerate(facts) }
-    fact_to_idx2 = { x : i for i, x in enumerate(facts) }
-
-    ilp = cplex.Cplex()
-    ilp.objective.set_sense(ilp.objective.sense.maximize)
-    ilp.set_log_stream(None)
-    ilp.set_error_stream(None)
-    ilp.set_results_stream(None)
-    ilp.set_warning_stream(None)
-    ilp.parameters.tune_problem([(ilp.parameters.threads, 1)])
-    ilp.variables.add(obj = [1. for x in facts],
-                      names = [str(x.fact) for x in facts],
-                      types = ['B' for x in facts])
-
-    # Initial state constraint
-    s_init = list(set(task.init) & set([x.fact for x in facts]))
-    constr = cplex.SparsePair(ind = [fact_to_idx[x] for x in s_init],
-                              val = [1. for _ in s_init])
-    ilp.linear_constraints.add(lin_expr = [constr], senses = ['L'], rhs = [1.])
-
-    # Action constraints
-    for action in facts[0].actions:
-        add_eff = [fact_to_idx2[x] for x in action.add_eff]
-        pre_del = [fact_to_idx2[x] for x in action.pre_del]
-
-        constr = cplex.SparsePair(ind = add_eff + pre_del,
-                                  val = [1. for _ in add_eff]
-                                        + [-1. for _ in pre_del])
-        constr2 = cplex.SparsePair(ind = pre_del, val = [1. for _ in pre_del])
-        ilp.linear_constraints.add(lin_expr = [constr, constr2],
-                                   senses = ['L', 'L'], rhs = [0., 1.])
-
-    # Bind and conflict set constraints
-    for f in facts:
-        bind = [fact_to_idx2[x] for x in f.bind - set([f])]
-        cbind = cplex.SparsePair(ind = bind + [fact_to_idx2[f]],
-                                 val = [-1. for _ in bind] + [len(bind)])
-
-        confl = [fact_to_idx2[x] for x in f.conflict]
-        cconfl = cplex.SparsePair(ind = confl + [fact_to_idx2[f]],
-                                  val = [1. for _ in confl] + [len(confl)])
-        ilp.linear_constraints.add(lin_expr = [cbind, cconfl],
-                                   senses = ['L', 'L'], rhs = [0., len(confl)])
-
-    mutexes = set()
-    ilp.solve()
-    #print(c.solution.get_status())
-    while ilp.solution.get_status() == 101:
-        values = ilp.solution.get_values()
-        if sum(values) <= 1.5:
-            break
-        sol = [facts[x].fact for x in range(len(values)) if values[x] > 0.5]
-        mutexes.add(frozenset(sol))
-
-        # Add constraint removing all subsets of the current solution
-        constr_idx = [x for x in range(len(values)) if values[x] < 0.5]
-        constr = cplex.SparsePair(ind = constr_idx,
-                                  val = [1. for _ in constr_idx])
-        ilp.linear_constraints.add(lin_expr = [constr],
-                                   senses = ['G'], rhs = [1.])
-        ilp.solve()
-
-    return mutexes, set()
+    return fa.fa(task, atoms, actions, True, facts)

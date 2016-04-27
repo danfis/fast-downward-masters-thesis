@@ -2,7 +2,7 @@ import cplex
 
 import common
 
-def fa(task, atoms, actions, rfa = False):
+def fa(task, atoms, actions, rfa = False, rfa_bind_conflict = None):
     atoms = common.filter_atoms(atoms)
     atoms_dict, atoms_list = common.create_atoms_dict(atoms)
 
@@ -44,6 +44,22 @@ def fa(task, atoms, actions, rfa = False):
             constr2 = cplex.SparsePair(ind = pre_del, val = [1. for _ in pre_del])
             ilp.linear_constraints.add(lin_expr = [constr2],
                                        senses = ['L'], rhs = [1.])
+
+    # Bind and conflict set constraints
+    if rfa_bind_conflict is not None:
+        for f in rfa_bind_conflict:
+            if len(f.bind) > 1:
+                bind = [atoms_dict[x.fact] for x in f.bind - set([f])]
+                cbind = cplex.SparsePair(ind = bind + [atoms_dict[f.fact]],
+                                         val = [-1. for _ in bind] + [len(bind)])
+                ilp.linear_constraints.add(lin_expr = [cbind],
+                                           senses = ['L'], rhs = [0.])
+
+            confl  = [atoms_dict[x.fact] for x in f.conflict]
+            cconfl = cplex.SparsePair(ind = confl + [atoms_dict[f.fact]],
+                                      val = [1. for _ in confl] + [len(confl)])
+            ilp.linear_constraints.add(lin_expr = [cconfl],
+                                       senses = ['L'], rhs = [len(confl)])
 
     mutexes = set()
     ilp.solve()
