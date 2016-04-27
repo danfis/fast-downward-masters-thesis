@@ -48,6 +48,12 @@ def fa(task, atoms, actions, rfa = False, rfa_bind_conflict = None):
     # Bind and conflict set constraints
     if rfa_bind_conflict is not None:
         for f in rfa_bind_conflict:
+            if f in f.conflict:
+                constr = cplex.SparsePair(ind = [atoms_dict[f.fact]], val = [1.])
+                ilp.linear_constraints.add(lin_expr = [constr],
+                                           senses = ['E'], rhs = [0.])
+                continue
+
             if len(f.bind) > 1:
                 bind = [atoms_dict[x.fact] for x in f.bind - set([f])]
                 cbind = cplex.SparsePair(ind = bind + [atoms_dict[f.fact]],

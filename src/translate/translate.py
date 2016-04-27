@@ -28,6 +28,10 @@ import sas_tasks
 import simplify
 import timers
 import tools
+import time
+
+t1 = time.time()
+t2 = None
 
 # TODO: The translator may generate trivial derived variables which are always
 # true, for example if there ia a derived predicate in the input that only
@@ -527,21 +531,12 @@ def pddl_to_sas(task):
     for item in goal_list:
         assert isinstance(item, pddl.Literal)
 
+    global t1, t2
+    t1 = time.time() - t1
     with timers.timing("Computing fact groups", block=True):
         groups, mutex_groups, translation_key = fact_groups.compute_groups(
-            task, atoms, reachable_action_params)
-        import mutex
-#        rfa, _ = mutex.rfa(task, atoms, actions)
-#        fa, _ = mutex.fa(task, atoms, actions)
-#        all_mutexes, unreachable = mutex.full(task, atoms, actions, True)
-#        mutex.check_mutexes(all_mutexes, groups)
-#        mutex.check_mutexes(all_mutexes, fa)
-#        mutex.check_mutexes(all_mutexes, rfa)
-#        rfa, _ = mutex.rfa_complete(task, atoms, actions)
-#        mutex.check_mutexes(all_mutexes, rfa)
-        h2, _ = mutex.h2(task, atoms, actions)
-#        mutex.check_mutexes(all_mutexes, h2)
-        print(len(h2))
+            task, atoms, reachable_action_params, actions)
+    t2 = time.time()
 
     with timers.timing("Building STRIPS to SAS dictionary"):
         ranges, strips_to_sas = strips_to_sas_dictionary(
@@ -689,6 +684,10 @@ def main():
         with open("output.sas", "w") as output_file:
             sas_task.output(output_file)
     print("Done! %s" % timer)
+    global t1, t2
+    t2 = time.time() - t2
+    print('Time1:', t1)
+    print('Time2:', t2)
 
 
 if __name__ == "__main__":

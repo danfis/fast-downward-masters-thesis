@@ -42,6 +42,18 @@ def parse_args():
     argparser.add_argument(
         "--dump-task", action="store_true",
         help="dump human-readable SAS+ representation of the task")
+    argparser.add_argument(
+        "--mutex", default = 'fd',
+        dest="mutex", action="store"
+    )
+    argparser.add_argument(
+        "--mutex-max",
+        dest="mutex_max", action="store_true"
+    )
+    argparser.add_argument(
+        "--mutex-check",
+        dest="mutex_check", action="store", type=int, default=-1
+    )
     return argparser.parse_args()
 
 
