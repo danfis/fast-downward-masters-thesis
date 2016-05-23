@@ -18,12 +18,10 @@ def atoms_to_keys(atoms, atoms_dict):
     return set(keys)
 
 def gen_all_pairs(sets):
-    pairs = [list(comb(s, 2)) for s in sets]
-    if len(pairs) == 0:
-        return set()
-
-    pairs = reduce(lambda x, y: x + y, pairs)
-    pairs = set([frozenset(x) for x in pairs])
+    pairs = set()
+    for s in sets:
+        for p in comb(s,2):
+            pairs.add(frozenset(p))
     return pairs
 
 def pair_mutexes(mutexes):
@@ -109,7 +107,7 @@ def extend_mutexes(mutexes, task, atoms, actions):
     atoms = common.filter_atoms(atoms)
     pairs = gen_all_pairs(mutexes)
     if len(pairs) == 0:
-        return pairs
+        return set(), set()
 
     actions = [ExtendAction(x, atoms) for x in actions]
     spurious = SpuriousDetector(actions)
