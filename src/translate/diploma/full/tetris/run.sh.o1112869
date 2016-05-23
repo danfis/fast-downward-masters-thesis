@@ -1,0 +1,92 @@
+Parsing...
+Parsing: [0.010s CPU, 0.070s wall-clock]
+Normalizing task... [0.000s CPU, 0.000s wall-clock]
+Instantiating...
+Generating Datalog program... [0.000s CPU, 0.001s wall-clock]
+Normalizing Datalog program...
+Normalizing Datalog program: [0.020s CPU, 0.094s wall-clock]
+Preparing model... [0.000s CPU, 0.004s wall-clock]
+Generated 79 rules.
+Computing model... [0.660s CPU, 0.647s wall-clock]
+14520 relevant atoms
+8848 auxiliary atoms
+23368 final queue length
+64755 total queue pushes
+Completing instantiation... [1.480s CPU, 1.489s wall-clock]
+Instantiating: [2.180s CPU, 2.254s wall-clock]
+Computing fact groups...
+Finding invariants...
+14 initial candidates
+Finding invariants: [0.040s CPU, 0.043s wall-clock]
+Checking invariant weight... [0.000s CPU, 0.000s wall-clock]
+Instantiating groups... [0.000s CPU, 0.000s wall-clock]
+Collecting mutex groups... [0.000s CPU, 0.000s wall-clock]
+Choosing groups...
+368 uncovered facts
+Choosing groups: [0.000s CPU, 0.000s wall-clock]
+Building translation key... [0.010s CPU, 0.004s wall-clock]
+mutex.full():: Reached states: 1
+mutex.full():: Reached states: 4
+mutex.full():: Reached states: 15
+mutex.full():: Reached states: 39
+mutex.full():: Reached states: 87
+mutex.full():: Reached states: 161
+mutex.full():: Reached states: 283
+mutex.full():: Reached states: 497
+mutex.full():: Reached states: 851
+mutex.full():: Reached states: 1424
+mutex.full():: Reached states: 2266
+mutex.full():: Reached states: 3366
+mutex.full():: Reached states: 4720
+mutex.full():: Reached states: 6317
+mutex.full():: Reached states: 8227
+mutex.full():: Reached states: 10460
+mutex.full():: Reached states: 12987
+mutex.full():: Reached states: 15739
+mutex.full():: Reached states: 18665
+mutex.full():: Reached states: 21648
+mutex.full():: Reached states: 24656
+mutex.full():: Reached states: 27718
+mutex.full():: Reached states: 30768
+mutex.full():: Reached states: 33735
+mutex.full():: Reached states: 36242
+mutex.full():: Reached states: 38038
+mutex.full():: Reached states: 39291
+mutex.full():: Reached states: 40196
+mutex.full():: Reached states: 40844
+mutex.full():: Reached states: 41315
+mutex.full():: Reached states: 41659
+mutex.full():: Reached states: 41916
+mutex.full():: Reached states: 42062
+mutex.full():: Reached states: 42107
+mutex.full():: Reached states: 42112
+75626
+Computing fact groups: [246.020s CPU, 246.790s wall-clock]
+Building STRIPS to SAS dictionary... [0.000s CPU, 0.010s wall-clock]
+Building dictionary for full mutex groups... [0.000s CPU, 0.001s wall-clock]
+Building mutex information...
+Building mutex information: [0.000s CPU, 0.001s wall-clock]
+Translating task...
+Processing axioms...
+Simplifying axioms... [0.000s CPU, 0.000s wall-clock]
+Processing axioms: [0.030s CPU, 0.026s wall-clock]
+Translating task: [0.900s CPU, 0.902s wall-clock]
+12704 effect conditions simplified
+0 implied preconditions added
+Detecting unreachable propositions...
+0 operators removed
+0 axioms removed
+2 propositions removed
+Detecting unreachable propositions: [0.620s CPU, 0.616s wall-clock]
+Translator variables: 370
+Translator derived variables: 0
+Translator facts: 768
+Translator goal facts: 8
+Translator mutex groups: 2
+Translator total mutex groups size: 32
+Translator operators: 5144
+Translator axioms: 0
+Translator task size: 44290
+Translator peak memory: 133652 KB
+Writing output... [0.110s CPU, 0.177s wall-clock]
+Done! [249.910s CPU, 250.897s wall-clock]

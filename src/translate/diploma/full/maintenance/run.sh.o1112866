@@ -1,0 +1,68 @@
+Parsing...
+Parsing: [0.000s CPU, 0.058s wall-clock]
+Normalizing task... [0.000s CPU, 0.000s wall-clock]
+Instantiating...
+Generating Datalog program... [0.010s CPU, 0.001s wall-clock]
+Normalizing Datalog program...
+Normalizing Datalog program: [0.000s CPU, 0.096s wall-clock]
+Preparing model... [0.000s CPU, 0.001s wall-clock]
+Generated 5 rules.
+Computing model... [0.000s CPU, 0.002s wall-clock]
+133 relevant atoms
+13 auxiliary atoms
+146 final queue length
+436 total queue pushes
+Completing instantiation... [0.000s CPU, 0.004s wall-clock]
+Instantiating: [0.010s CPU, 0.104s wall-clock]
+Computing fact groups...
+Finding invariants...
+4 initial candidates
+Finding invariants: [0.000s CPU, 0.000s wall-clock]
+Checking invariant weight... [0.000s CPU, 0.000s wall-clock]
+Instantiating groups... [0.000s CPU, 0.000s wall-clock]
+Collecting mutex groups... [0.000s CPU, 0.000s wall-clock]
+Choosing groups...
+20 uncovered facts
+Choosing groups: [0.000s CPU, 0.000s wall-clock]
+Building translation key... [0.000s CPU, 0.000s wall-clock]
+mutex.full():: Reached states: 1
+mutex.full():: Reached states: 19
+mutex.full():: Reached states: 161
+mutex.full():: Reached states: 807
+mutex.full():: Reached states: 2683
+mutex.full():: Reached states: 6317
+mutex.full():: Reached states: 11075
+mutex.full():: Reached states: 15237
+mutex.full():: Reached states: 17568
+mutex.full():: Reached states: 18324
+mutex.full():: Reached states: 18432
+15
+Computing fact groups: [1.580s CPU, 2.099s wall-clock]
+Building STRIPS to SAS dictionary... [0.000s CPU, 0.000s wall-clock]
+Building dictionary for full mutex groups... [0.010s CPU, 0.000s wall-clock]
+Building mutex information...
+Building mutex information: [0.000s CPU, 0.000s wall-clock]
+Translating task...
+Processing axioms...
+Simplifying axioms... [0.000s CPU, 0.000s wall-clock]
+Processing axioms: [0.000s CPU, 0.000s wall-clock]
+Translating task: [0.000s CPU, 0.002s wall-clock]
+30 effect conditions simplified
+0 implied preconditions added
+Detecting unreachable propositions...
+0 operators removed
+0 axioms removed
+0 propositions removed
+Detecting unreachable propositions: [0.000s CPU, 0.001s wall-clock]
+Translator variables: 20
+Translator derived variables: 0
+Translator facts: 40
+Translator goal facts: 10
+Translator mutex groups: 0
+Translator total mutex groups size: 0
+Translator operators: 30
+Translator axioms: 0
+Translator task size: 170
+Translator peak memory: 34604 KB
+Writing output... [0.000s CPU, 0.004s wall-clock]
+Done! [1.600s CPU, 2.269s wall-clock]
