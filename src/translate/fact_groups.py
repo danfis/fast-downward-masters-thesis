@@ -139,6 +139,11 @@ def compute_groups(task, atoms, reachable_action_params, actions):
 
         elif mtype == 'full':
             g, _ = mutex.full(task, atoms, actions, True)
+
+        elif mtype.startswith('full'):
+            size = int(mtype[4:])
+            g, _ = mutex.full(task, atoms, actions, True, size)
+
         else:
             raise Exception('Uknown mutex algorithm: ' + mtype)
 
@@ -155,8 +160,8 @@ def compute_groups(task, atoms, reachable_action_params, actions):
         print('MUTEX:', ';'.join(sorted([str(x) for x in m])))
     for m in mutex.pair_mutexes(groups):
         print('MUTEX2:', ';'.join(sorted([str(x) for x in m])))
-    for m in mutex.max_mutexes(groups):
-        print('MUTEX-MAX:', ';'.join(sorted([str(x) for x in m])))
+#    for m in mutex.max_mutexes(groups):
+#        print('MUTEX-MAX:', ';'.join(sorted([str(x) for x in m])))
 
     if options.mutex_check >= 0:
         check, _ = mutex.full(task, atoms, actions, True, options.mutex_check)
